@@ -105,7 +105,7 @@ class CalEvent {
       }
 
       const o = {
-        date: format(date, 'YYYY-MM-DD HH:mm:ss'),
+        date: format(toTimezone(date, timezone), 'YYYY-MM-DD HH:mm:ss'),
         start: toTimezone(date, timezone),
         end: toTimezone(endDate, timezone)
       }

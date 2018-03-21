@@ -10,9 +10,11 @@ const _ = {
   omit: require('lodash.omit'),
   set: require('lodash.set')
 }
-const {toYear, toDate} = require('./internal/utils')
+const {toYear, toDate, toTimezone} = require('./internal/utils')
 const Data = require('./Data')
 const DateFn = require('./DateFn')
+const compareAsc = require('date-fns/compare_asc')
+const addMinutes = require('date-fns/add_minutes')
 
 const TYPES = ['public', 'bank', 'school', 'optional', 'observance']
 
@@ -76,7 +78,9 @@ Holidays.prototype = {
 
     const holidays = this.__data.getRules()
     if (holidays) {
-      this.__timezone = opts.timezone || this.__data.getTimezones()[0]
+      console.log(opts.timezone)
+      console.log(this.__data.getTimezones())
+      this.__timezone = opts.timezone//this.__data.getTimezones()[0]
       Object.keys(holidays).forEach((rule) => {
         this.setHoliday(rule, holidays[rule])
       })
@@ -211,13 +215,17 @@ Holidays.prototype = {
    * ```
    */
   isHoliday (date) {
-    date = date || new Date()
+    date = toTimezone(date || new Date(), this.__timezone)
     const year = toYear(date)
     const rules = Object.keys(this.holidays)
     for (const i in rules) {
       const hd = [].concat(this._dateByRule(year, rules[i]))
       for (const j in hd) {
-        if (hd[j] && date >= hd[j].start && date < hd[j].end) {
+        console.log(hd[j].start)
+        console.log(hd[j].end)
+        console.log(date)
+        console.log('--')
+        if (hd[j] && compareAsc(date, hd[j].start) !== -1 && compareAsc(date, hd[j].end) === -1) {
           return this._translate(hd[j])
         }
       }
