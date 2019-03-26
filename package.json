@@ -77,6 +77,8 @@
     "caldate": "^1.0.3",
     "date-chinese": "^1.0.6",
     "date-easter": "^0.2.4",
+    "date-fns": "2.0.0-alpha.27",
+    "date-fns-tz": "^1.0.7",
     "lodash.get": "^4.4.2",
     "lodash.merge": "^4.6.1",
     "lodash.omit": "^4.5.0",

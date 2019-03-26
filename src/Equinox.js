@@ -5,9 +5,10 @@ const julian = require('astronomia/lib/julian')
 const planetpos = require('astronomia/lib/planetposition')
 const earth = new planetpos.Planet(require('astronomia/data/vsop87Bearth'))
 
-const moment = require('moment-timezone')
 const CalEvent = require('./CalEvent')
 const CalDate = require('caldate')
+let moment // Only require when necessary
+let utcToZonedTime // Only require when necessary
 
 class Equinox extends CalEvent {
   /**
@@ -46,16 +47,29 @@ class Equinox extends CalEvent {
 
     const str = new julian.Calendar().fromJDE(jde).toDate().toISOString()
     let date
+    let floorDate
     if (/^[+-]\d{2}:\d{2}?$/.test(this._timezone)) { // for '+08:00' formats
-      date = moment(str).utcOffset(this._timezone)
-    } else { // for 'Asia/Shanghai' formats
-      date = moment(str).tz(this._timezone) // move to timezone
-    }
+      if (!utcToZonedTime) {
+        utcToZonedTime = require('date-fns-tz').utcToZonedTime;
+      }
+      date = utcToZonedTime(str, this._timezone)
 
-    const floorDate = {
-      year: year,
-      month: date.month() + 1,
-      day: date.date()
+      floorDate = {
+        year: year,
+        month: date.getMonth() + 1,
+        day: date.getDate()
+      }
+    } else { // for 'Asia/Shanghai' formats
+      if (!moment) {
+        moment = require('moment-timezone')
+      }
+      date = moment(str).tz(this._timezone) // move to timezone
+
+      floorDate = {
+        year: year,
+        month: date.month() + 1,
+        day: date.date()
+      }
     }
 
     const d = new CalDate(floorDate).setOffset(this.offset)
